@@ -22,10 +22,16 @@ const getOneData = async (id: string, collection: string) => {
 	try {
 		const oneSnapshot = await db.collection(collection).doc(id).get();
 
-		return {
-			id: oneSnapshot.id,
-			...oneSnapshot.data(),
-		};
+		if (oneSnapshot.exists) {
+
+			return {
+				id: oneSnapshot.id,
+				...oneSnapshot.data(),
+			};
+		}
+		else {
+			throw new Error(`No such document`)
+		}
 	} catch (error) {
 		throw new Error(`${error}`);
 	}

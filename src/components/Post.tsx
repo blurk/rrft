@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 import { formUpdate, showModal } from '../actions/appActions';
 import { deletePost } from '../actions/postActions';
 
-const defaultImage = 'https://www.ghibli.jp/gallery/chihiro042.jpg';
-
 export default function Post({ post }: IProps) {
 	const dispatch = useDispatch();
 
@@ -26,7 +24,7 @@ export default function Post({ post }: IProps) {
 					<div className='block w-full h-3/4'>
 						<img
 							alt='alt'
-							src={post.image || defaultImage}
+							src={post.image}
 							className='object-cover w-full max-h-40'
 						/>
 						<div className='w-full p-4 bg-white dark:bg-gray-800'>
@@ -49,11 +47,11 @@ export default function Post({ post }: IProps) {
 							<svg
 								xmlns='http://www.w3.org/2000/svg'
 								viewBox='0 0 20 20'
-								className='w-5 h-5 mr-2'
+								className='w-5 h-5 md:mr-2'
 								fill='currentColor'>
 								<path d='M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z' />
 							</svg>
-							Edit
+							<span className='hidden md:block'>Edit</span>
 						</button>
 						{/* DELETE BUTTON */}
 						<button
@@ -63,7 +61,7 @@ export default function Post({ post }: IProps) {
 							<svg
 								xmlns='http://www.w3.org/2000/svg'
 								viewBox='0 0 20 20'
-								className='w-5 h-5 mr-2'
+								className='w-5 h-5 md:mr-2'
 								fill='currentColor'>
 								<path
 									fillRule='evenodd'
@@ -71,7 +69,7 @@ export default function Post({ post }: IProps) {
 									clipRule='evenodd'
 								/>
 							</svg>
-							Delete
+							<span className='hidden md:block'>Delete</span>
 						</button>
 						{/* DETAILS BUTTON */}
 						<Link
@@ -81,7 +79,7 @@ export default function Post({ post }: IProps) {
 							<svg
 								xmlns='http://www.w3.org/2000/svg'
 								viewBox='0 0 20 20'
-								className='w-5 h-5 mr-2'
+								className='w-5 h-5 md:mr-2'
 								fill='currentColor'>
 								<path d='M10 12a2 2 0 100-4 2 2 0 000 4z' />
 								<path
@@ -90,7 +88,7 @@ export default function Post({ post }: IProps) {
 									clipRule='evenodd'
 								/>
 							</svg>
-							View
+							<span className='hidden md:block'>View</span>
 						</Link>
 					</div>
 				</div>

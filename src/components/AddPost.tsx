@@ -24,7 +24,7 @@ export default function AddPost() {
 				<svg
 					xmlns='http://www.w3.org/2000/svg'
 					viewBox='0 0 20 20'
-					className='w-5 h-5 mr-2 -ml-1'
+					className='w-5 h-5 md:mr-2'
 					fill='currentColor'>
 					<path
 						fillRule='evenodd'
@@ -32,7 +32,7 @@ export default function AddPost() {
 						clipRule='evenodd'
 					/>
 				</svg>
-				ADD
+				<span className='hidden md:block'>ADD</span>
 			</button>
 		</span>
 	);

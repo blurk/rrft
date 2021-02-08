@@ -29,19 +29,32 @@ interface IParams {
 interface IProps {
   children?: ReactNode;
   post?: IPost,
-  postDetails?: IPost
+  postDetails?: IPost | any,
+  ref?: any,
+  forwardedRef?: any
+
 }
 
 type PostState = {
-  posts: IPost[],
-  postDetails?: IPost,
+  posts?: IPost[],
+  iPosts?: IPost[],
+  postDetails?: IPost | {},
   loading?: boolean,
-  error?: Object | string,
+  error?: Object | string | null,
+  lastVisible?: object | null,
+  chunks?: IPost[],
+  pPosts?: IPost[],
+  hasmore?: boolean,
+  nHasmore?: boolean,
+  pHasmore?: boolean,
+  tracker?: string,
+  trackerNext?: string,
+  trackerPrev?: string,
 }
 
 type PostAction = {
   type: string,
-  payload: any
+  payload?: any
 }
 
 type AppState = {

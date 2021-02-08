@@ -5,8 +5,7 @@ import { formAdd, showModal } from '../actions/appActions';
 export default function AddPost() {
 	const dispatch = useDispatch();
 
-	const modalReducer = useSelector((state: RootState) => state.modalReducer);
-	const { modalShow } = modalReducer;
+	const { modalShow } = useSelector((state: RootState) => state.modalReducer);
 
 	const openForm = () => {
 		dispatch(formAdd());

@@ -1,5 +1,6 @@
 import React from 'react';
 
+const defaultLink = 'https://www.ghibli.jp/gallery/ponyo016.jpg';
 export default function PostDetails({ postDetails }: IProps) {
 	const seconds = postDetails?.createdAt?.seconds;
 	const date = new Date(seconds!);
@@ -17,7 +18,11 @@ export default function PostDetails({ postDetails }: IProps) {
 						</h4>
 						<p className='text-base text-gray-500'>{postDetails?.content}</p>
 					</div>
-					<img src={postDetails?.image} alt='alt' className='max-w-full' />
+					<img
+						src={postDetails?.image || defaultLink}
+						alt='alt'
+						className='max-w-full'
+					/>
 				</div>
 			)}
 		</>

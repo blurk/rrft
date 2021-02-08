@@ -4,12 +4,16 @@ import { Link } from 'react-router-dom';
 import { formUpdate, showModal } from '../actions/appActions';
 import { deletePost } from '../actions/postActions';
 
-export default function Post({ post }: IProps) {
+const defaultLink = 'https://www.ghibli.jp/gallery/ponyo016.jpg';
+
+export default function Post({ post, forwardedRef }: IProps) {
 	const dispatch = useDispatch();
+
+	const { title, image, content, id } = post!;
 
 	const handleDelete = () => {
 		const isDelete = window.confirm('Delete?');
-		isDelete && dispatch(deletePost(post?.id!));
+		isDelete && dispatch(deletePost(id));
 	};
 
 	const handleUpdate = () => {
@@ -20,20 +24,23 @@ export default function Post({ post }: IProps) {
 	return (
 		<>
 			{post && (
-				<div className='m-auto my-5 overflow-hidden rounded-lg shadow-lg h-96 w-60 md:w-80'>
+				<div
+					ref={forwardedRef}
+					className='m-auto my-5 overflow-hidden rounded-lg shadow-lg h-96 w-60 md:w-80'
+					id={`post-${id}`}>
 					<div className='block w-full h-3/4'>
 						<img
 							alt='alt'
-							src={post.image}
-							className='object-cover w-full max-h-40'
+							src={image || defaultLink}
+							className='object-cover w-full h-40'
 						/>
 						<div className='w-full p-4 bg-white dark:bg-gray-800'>
 							<p className='font-medium text-indigo-500 text-md'></p>
 							<p className='mb-2 text-xl font-medium text-gray-800 dark:text-white'>
-								{post.title}
+								{title}
 							</p>
 							<p className='font-light text-gray-400 truncate dark:text-gray-300 text-md'>
-								{post.content}
+								{content}
 							</p>
 						</div>
 					</div>

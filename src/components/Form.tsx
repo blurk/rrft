@@ -1,8 +1,7 @@
-import React, { FormEvent } from 'react';
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { formAdd, hideModal } from '../actions/appActions';
 import { addPost, updatePost } from '../actions/postActions';
-import { useForm } from '../hooks/useForm';
 
 export default function Form() {
 	const dispatch = useDispatch();
@@ -10,11 +9,20 @@ export default function Form() {
 		(state: RootState) => state.formReducer
 	);
 
-	let [post, handleChange] = useForm({
-		title: isUpdating ? currentPost?.title : '',
-		image: isUpdating ? currentPost?.image : '',
-		content: isUpdating ? currentPost?.content : '',
+	const [post, setPost] = useState<IFormState>({
+		title: '',
+		image: '',
+		content: '',
 	});
+
+	const handleInputChange = (e: ChangeEvent) => {
+		const { name, value } = e.target as HTMLInputElement;
+		setPost((prevPost) => ({ ...prevPost, [name]: value }));
+	};
+
+	useEffect(() => {
+		setPost((prevPost) => ({ ...prevPost, ...currentPost }));
+	}, [currentPost]);
 
 	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault();
@@ -43,8 +51,8 @@ export default function Form() {
 				placeholder='Title'
 				name='title'
 				type='text'
-				onChange={handleChange}
-				value={post?.title}
+				onChange={handleInputChange}
+				value={post?.title || ''}
 				required
 			/>
 			<input
@@ -53,15 +61,15 @@ export default function Form() {
 				placeholder='Image link'
 				name='image'
 				type='text'
-				value={post?.image}
-				onChange={handleChange}
+				value={post?.image || ''}
+				onChange={handleInputChange}
 			/>
 			<textarea
 				className='p-3 bg-gray-100 border border-gray-300 outline-none resize-none description h-60'
 				spellCheck='false'
 				name='content'
-				value={post?.content}
-				onChange={handleChange}
+				value={post?.content || ''}
+				onChange={handleInputChange}
 				placeholder='Content of post'></textarea>
 
 			<div className='flex mt-5'>

@@ -76,3 +76,4 @@ type DispatchType = (args: AppAction | PostAction | any) => AppAction | PostActi
 
 type IndexObject = { [index: string]: any }
 
+type FirebaseSort = 'desc' | 'asc' | undefined

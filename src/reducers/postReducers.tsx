@@ -29,15 +29,20 @@ export const postReducer = (
 		nHasmore: true,
 		pHasmore: true,
 		pPosts: [],
-		trackerNext: '',
-		trackerPrev: '',
 	},
 	action: PostAction
 ): PostState => {
 	switch (action.type) {
 		// GET ALL
 		case POST_LIST_REQUEST:
-			return { ...state, loading: true, posts: [] };
+			return {
+				...state,
+				loading: true,
+				posts: [],
+				iPosts: [],
+				pPosts: [],
+				tracker: '',
+			};
 		case POST_LIST_SUCCESS:
 			return {
 				...state,
@@ -59,8 +64,8 @@ export const postReducer = (
 		// GET INFINITE
 		case POST_INIFINITE_REQUEST:
 			return state.iPosts
-				? { ...state, loading: true }
-				: { ...state, loading: true, iPosts: [] };
+				? { ...state, loading: true, posts: [], pPosts: [] }
+				: { ...state, loading: true, posts: [], iPosts: [], pPosts: [] };
 		case POST_INIFINITE_SUCCESS:
 			const { data, tracker, hasmore } = action.payload;
 			return {
@@ -76,8 +81,8 @@ export const postReducer = (
 		//GET PAGINATE NEXT
 		case POST_PAGINATE_REQUEST_NEXT:
 			return state.iPosts
-				? { ...state, loading: true }
-				: { ...state, loading: true, iPosts: [] };
+				? { ...state, loading: true, posts: [] }
+				: { ...state, loading: true, posts: [], pPosts: [] };
 		case POST_PAGINATE_NEXT_SUCCESS:
 			const { nData, trackerNext, nHasmore } = action.payload;
 
@@ -95,8 +100,8 @@ export const postReducer = (
 		//GET PAGINATE PREV
 		case POST_PAGINATE_REQUEST_PREV:
 			return state.pPosts
-				? { ...state, loading: true }
-				: { ...state, loading: true, pPosts: [] };
+				? { ...state, loading: true, posts: [] }
+				: { ...state, loading: true, pPosts: [], posts: [] };
 		case POST_PAGINATE_PREV_SUCCESS:
 			const { pData, trackerPrev, pHasmore } = action.payload;
 			return {

@@ -37,15 +37,15 @@ const getOneData = async (id: string, collection: string) => {
 	}
 };
 
-const getInfiniteData = async (limit: number, collection: string, tracker: string) => {
+const getInfiniteData = async (limit: number, collection: string, tracker: string, orderBy: 'createdAt', sort: 'desc') => {
 	try {
 		let first;
 
 		if (!tracker) {
-			first = db.collection(collection).limit(limit)
+			first = db.collection(collection).orderBy(orderBy, sort).limit(limit)
 		} else {
 			const lastDoc = await db.collection(collection).doc(tracker).get();
-			first = db.collection(collection).startAfter(lastDoc).limit(limit)
+			first = db.collection(collection).orderBy(orderBy, sort).startAfter(lastDoc).limit(limit)
 		}
 
 		const documentSnapshots = await first.get()
@@ -70,10 +70,10 @@ const getInfiniteData = async (limit: number, collection: string, tracker: strin
 	}
 }
 
-const getStartEnd = async (collection: string, field: string) => {
+const getStartEnd = async (collection: string, orderBy: string, sort: FirebaseSort) => {
 	try {
 		const allSnapshot = await db
-			.collection(collection).orderBy(field)
+			.collection(collection).orderBy(orderBy, sort)
 			.get();
 
 		const docs = allSnapshot.docs.map((doc) => doc.id);
@@ -84,21 +84,22 @@ const getStartEnd = async (collection: string, field: string) => {
 	}
 };
 
-const getPaginateDataNext = async (limit: number, collection: string, last: string) => {
+const getPaginateDataNext = async (limit: number, collection: string, last: string, orderBy = 'createdAt', sort = 'desc') => {
+	const ref = db.collection(collection);
+	let query;
 	try {
 
-		const { end, start } = await getStartEnd(collection, 'title');
+		const { end, start } = await getStartEnd(collection, orderBy, sort as FirebaseSort);
 
-		let first;
 
 		if (!last) {
-			first = db.collection(collection).orderBy('title').limit(limit)
+			query = ref.orderBy(orderBy, sort as FirebaseSort).limit(limit)
 		} else {
-			const lastDoc = await db.collection(collection).doc(last).get();
-			first = db.collection(collection).orderBy('title').startAfter(lastDoc).limit(limit)
+			const lastDoc = await ref.doc(last).get();
+			query = ref.orderBy(orderBy, sort as FirebaseSort).startAfter(lastDoc).limit(limit)
 		}
 
-		const documentSnapshots = await first.get()
+		const documentSnapshots = await query.get()
 
 		const data = documentSnapshots.docs.map((doc: any) => ({
 			...doc.data(),
@@ -106,15 +107,12 @@ const getPaginateDataNext = async (limit: number, collection: string, last: stri
 		}))
 
 
-		const lastVisible = documentSnapshots?.docs[documentSnapshots.docs.length - 1]?.id;
-		const firstVisible = documentSnapshots?.docs[0]?.id;
-
 		return {
 			data,
-			prev: firstVisible,
-			next: lastVisible,
-			nHasmore: lastVisible !== end,
-			pHasmore: firstVisible !== start,
+			prev: documentSnapshots?.docs[0]?.id,
+			next: documentSnapshots?.docs[documentSnapshots.docs.length - 1]?.id,
+			nHasmore: documentSnapshots?.docs[documentSnapshots.docs.length - 1]?.id !== end,
+			pHasmore: documentSnapshots?.docs[0]?.id !== start,
 		}
 
 	} catch (error) {
@@ -123,29 +121,29 @@ const getPaginateDataNext = async (limit: number, collection: string, last: stri
 	}
 }
 
-const getPaginateDataPrev = async (limit: number, collection: string, first: string) => {
+const getPaginateDataPrev = async (limit: number, collection: string, first: string, orderBy = 'createdAt', sort = 'desc') => {
+	const ref = db.collection(collection);
+	let query;
 	try {
-		const { start, end } = await getStartEnd(collection, 'title');
+		const { start, end } = await getStartEnd(collection, orderBy, sort as FirebaseSort);
 
-		const firstDoc = await db.collection(collection).doc(first).get();
-		const _first = db.collection(collection).orderBy('title').endBefore(firstDoc).limitToLast(limit)
+		const firstDoc = await ref.doc(first).get();
+		query = ref.orderBy(orderBy, sort as FirebaseSort).endBefore(firstDoc).limitToLast(limit)
 
-		const documentSnapshots = await _first.get()
+		const documentSnapshots = await query.get()
 
 		const data = documentSnapshots.docs.map((doc: any) => ({
 			...doc.data(),
 			id: doc.id,
 		}))
 
-		const lastVisible = documentSnapshots?.docs[documentSnapshots.docs.length - 1]?.id;
-		const firstVisible = documentSnapshots?.docs[0]?.id;
-
 		return {
 			data,
-			prev: firstVisible,
-			next: lastVisible,
-			nHasmore: lastVisible !== end,
-			pHasmore: firstVisible !== start,
+			prev: documentSnapshots?.docs[0]?.id,
+			next: documentSnapshots?.docs[documentSnapshots.docs.length - 1]?.id,
+			nHasmore: documentSnapshots?.docs[documentSnapshots.docs.length - 1]?.id !== end,
+			pHasmore: documentSnapshots?.docs[0]?.id !== start,
+
 		}
 
 	} catch (error) {

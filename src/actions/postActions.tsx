@@ -77,7 +77,9 @@ export const getPostInfinite = (limit: number) => async (
 		const { data, next, hasmore } = await getInfiniteData(
 			limit,
 			'posts',
-			tracker
+			tracker,
+			'createdAt',
+			'desc'
 		);
 
 		dispatch({
@@ -105,20 +107,18 @@ export const getPaginateNext = (limit: number) => async (
 
 		dispatch({ type: POST_PAGINATE_REQUEST_NEXT });
 
-		const { trackerNext } = getState().postReducer;
+		const { pPosts } = getState().postReducer;
 
-		const { data, next, nHasmore, pHasmore, prev } = await getPaginateDataNext(
+		const { data, nHasmore, pHasmore } = await getPaginateDataNext(
 			limit,
 			'posts',
-			trackerNext
+			pPosts[pPosts.length - 1]?.id
 		);
 
 		dispatch({
 			type: POST_PAGINATE_NEXT_SUCCESS,
 			payload: {
 				nData: data,
-				trackerNext: next,
-				trackerPrev: prev,
 				nHasmore,
 				pHasmore,
 			},
@@ -145,20 +145,18 @@ export const getPaginatePrev = (limit: number) => async (
 
 		dispatch({ type: POST_PAGINATE_REQUEST_PREV });
 
-		const { trackerPrev } = getState().postReducer;
+		const { pPosts } = getState().postReducer;
 
-		const { data, prev, next, nHasmore, pHasmore } = await getPaginateDataPrev(
+		const { data, nHasmore, pHasmore } = await getPaginateDataPrev(
 			limit,
 			'posts',
-			trackerPrev
+			pPosts[0]?.id
 		);
 
 		dispatch({
 			type: POST_PAGINATE_PREV_SUCCESS,
 			payload: {
 				pData: data,
-				trackerPrev: prev,
-				trackerNext: next,
 				pHasmore,
 				nHasmore,
 			},

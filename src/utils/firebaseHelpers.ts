@@ -37,18 +37,24 @@ const getOneData = async (id: string, collection: string) => {
 	}
 };
 
-const getInfiniteData = async (limit: number, collection: string, tracker: string, orderBy: 'createdAt', sort: 'desc') => {
+const getInfiniteData = async (limit: number, collection: string, tracker: string, orderBy: string, sort: FirebaseSort, search: string) => {
+	const searchField = 'title'
+	const ref = db.collection(collection)
+	let query;
+
 	try {
-		let first;
 
 		if (!tracker) {
-			first = db.collection(collection).orderBy(orderBy, sort).limit(limit)
+			query = search ? ref.where(searchField, '==', search).orderBy(orderBy, sort).limit(limit)
+				: ref.orderBy(orderBy, sort).limit(limit)
 		} else {
-			const lastDoc = await db.collection(collection).doc(tracker).get();
-			first = db.collection(collection).orderBy(orderBy, sort).startAfter(lastDoc).limit(limit)
+			const lastDoc = await ref.doc(tracker).get();
+
+			query = search ? ref.where(searchField, '==', search).orderBy(orderBy, sort).startAfter(lastDoc).limit(limit)
+				: ref.orderBy(orderBy, sort).startAfter(lastDoc).limit(limit)
 		}
 
-		const documentSnapshots = await first.get()
+		const documentSnapshots = await query.get()
 
 		const data = documentSnapshots.docs.map((doc: any) => ({
 			...doc.data(),
@@ -66,15 +72,18 @@ const getInfiniteData = async (limit: number, collection: string, tracker: strin
 		}
 
 	} catch (error) {
+		console.log(error)
 		throw new Error(`${error}`);
 	}
 }
 
-const getStartEnd = async (collection: string, orderBy: string, sort: FirebaseSort) => {
+const getStartEnd = async (collection: string, orderBy: string, sort: FirebaseSort, search: string) => {
+	const searchField = 'title';
+	const ref = db.collection(collection)
+	const query = search ? ref.where(searchField, '==', search).orderBy(orderBy, sort) : ref.orderBy(orderBy, sort)
+
 	try {
-		const allSnapshot = await db
-			.collection(collection).orderBy(orderBy, sort)
-			.get();
+		const allSnapshot = await query.get();
 
 		const docs = allSnapshot.docs.map((doc) => doc.id);
 
@@ -84,19 +93,21 @@ const getStartEnd = async (collection: string, orderBy: string, sort: FirebaseSo
 	}
 };
 
-const getPaginateDataNext = async (limit: number, collection: string, last: string, orderBy = 'createdAt', sort = 'desc') => {
+const getPaginateDataNext = async (limit: number, collection: string, last: string, orderBy: string, sort: FirebaseSort, search: string) => {
+	const searchField = 'title'
 	const ref = db.collection(collection);
 	let query;
 	try {
 
-		const { end, start } = await getStartEnd(collection, orderBy, sort as FirebaseSort);
+		const { end, start } = await getStartEnd(collection, orderBy, sort, search);
 
 
 		if (!last) {
-			query = ref.orderBy(orderBy, sort as FirebaseSort).limit(limit)
+			query = search ? ref.where(searchField, '==', search).orderBy(orderBy, sort).limit(limit) :
+				ref.orderBy(orderBy, sort).limit(limit)
 		} else {
 			const lastDoc = await ref.doc(last).get();
-			query = ref.orderBy(orderBy, sort as FirebaseSort).startAfter(lastDoc).limit(limit)
+			query = search ? ref.where(searchField, '==', search).orderBy(orderBy, sort).startAfter(lastDoc).limit(limit) : ref.orderBy(orderBy, sort).startAfter(lastDoc).limit(limit)
 		}
 
 		const documentSnapshots = await query.get()
@@ -121,14 +132,15 @@ const getPaginateDataNext = async (limit: number, collection: string, last: stri
 	}
 }
 
-const getPaginateDataPrev = async (limit: number, collection: string, first: string, orderBy = 'createdAt', sort = 'desc') => {
+const getPaginateDataPrev = async (limit: number, collection: string, first: string, orderBy: string, sort: FirebaseSort, search: string) => {
+	const searchField = 'title'
 	const ref = db.collection(collection);
 	let query;
 	try {
-		const { start, end } = await getStartEnd(collection, orderBy, sort as FirebaseSort);
+		const { start, end } = await getStartEnd(collection, orderBy, sort, search);
 
 		const firstDoc = await ref.doc(first).get();
-		query = ref.orderBy(orderBy, sort as FirebaseSort).endBefore(firstDoc).limitToLast(limit)
+		query = search ? ref.where(searchField, '==', search).orderBy(orderBy, sort).endBefore(firstDoc).limitToLast(limit) : ref.orderBy(orderBy, sort).endBefore(firstDoc).limitToLast(limit)
 
 		const documentSnapshots = await query.get()
 
@@ -151,7 +163,6 @@ const getPaginateDataPrev = async (limit: number, collection: string, first: str
 		throw new Error(`${error}`);
 	}
 }
-
 
 const addData = async (data: IPost | object, collection: string) => {
 	try {

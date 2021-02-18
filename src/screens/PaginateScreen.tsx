@@ -6,6 +6,8 @@ import Form from '../components/Form';
 import Loader from '../components/Loader';
 import Modal from '../components/Modal';
 import Post from '../components/Post';
+import Search from '../components/Search';
+import Sort from '../components/Sort';
 
 export default function PaginateScreen() {
 	const dispatch = useDispatch();
@@ -34,6 +36,10 @@ export default function PaginateScreen() {
 			<AddPost />
 			<div>
 				{/* MAIN */}
+				<div className='flex flex-col items-center justify-around h-24 mt-5 md:flex-row md:items-center md:justify-around'>
+					<Sort />
+					<Search />
+				</div>
 				{loading ? (
 					<Loader />
 				) : (

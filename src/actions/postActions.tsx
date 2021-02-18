@@ -14,6 +14,10 @@ import {
 	POST_PAGINATE_PREV_SUCCESS,
 	POST_PAGINATE_REQUEST_NEXT,
 	POST_PAGINATE_REQUEST_PREV,
+	POST_SEARCH_REQUEST,
+	POST_SEARCH_SUCCESS,
+	POST_SORT_REQUEST,
+	POST_SORT_SUCCESS,
 	POST_UPDATE_REQUEST,
 	POST_UPDATE_SUCCESS,
 } from '../constants/postConstants';
@@ -67,19 +71,19 @@ export const getPostInfinite = (limit: number) => async (
 ) => {
 	try {
 		const _hasmore = getState().postReducer.hasmore;
-
 		if (!_hasmore) return;
 
 		dispatch({ type: POST_INIFINITE_REQUEST });
 
-		const { tracker } = getState().postReducer;
+		const { tracker, orderBy, sort, search } = getState().postReducer;
 
 		const { data, next, hasmore } = await getInfiniteData(
 			limit,
 			'posts',
 			tracker,
-			'createdAt',
-			'desc'
+			orderBy,
+			sort,
+			search
 		);
 
 		dispatch({
@@ -87,6 +91,7 @@ export const getPostInfinite = (limit: number) => async (
 			payload: { data, tracker: next, hasmore },
 		});
 	} catch (error) {
+		console.log(error);
 		dispatch({
 			type: POST_FAIL,
 			payload: error,
@@ -107,12 +112,15 @@ export const getPaginateNext = (limit: number) => async (
 
 		dispatch({ type: POST_PAGINATE_REQUEST_NEXT });
 
-		const { pPosts } = getState().postReducer;
+		const { pPosts, orderBy, sort, search } = getState().postReducer;
 
 		const { data, nHasmore, pHasmore } = await getPaginateDataNext(
 			limit,
 			'posts',
-			pPosts[pPosts.length - 1]?.id
+			pPosts[pPosts.length - 1]?.id,
+			orderBy,
+			sort,
+			search
 		);
 
 		dispatch({
@@ -145,12 +153,15 @@ export const getPaginatePrev = (limit: number) => async (
 
 		dispatch({ type: POST_PAGINATE_REQUEST_PREV });
 
-		const { pPosts } = getState().postReducer;
+		const { pPosts, orderBy, sort, search } = getState().postReducer;
 
 		const { data, nHasmore, pHasmore } = await getPaginateDataPrev(
 			limit,
 			'posts',
-			pPosts[0]?.id
+			pPosts[0]?.id,
+			orderBy,
+			sort,
+			search
 		);
 
 		dispatch({
@@ -223,6 +234,42 @@ export const updatePost = (id: string, data: object) => async (
 		dispatch({
 			type: POST_FAIL,
 			payload: error,
+		});
+	}
+};
+
+export const sortPost = (orderBy: string, sort: FirebaseSort) => async (
+	dispatch: DispatchType
+) => {
+	try {
+		dispatch({ type: POST_SORT_REQUEST, payload: { orderBy, sort } });
+
+		dispatch(getPostInfinite(8));
+		dispatch(getPaginateNext(8));
+
+		dispatch({ type: POST_SORT_SUCCESS });
+	} catch (error) {
+		dispatch({
+			type: POST_FAIL,
+			payload: error,
+		});
+	}
+};
+
+export const searchPost = (search: string) => async (
+	dispatch: DispatchType
+) => {
+	try {
+		dispatch({ type: POST_SEARCH_REQUEST, payload: { search } });
+
+		dispatch(getPostInfinite(8));
+		dispatch(getPaginateNext(8));
+
+		dispatch({ type: POST_SEARCH_SUCCESS });
+	} catch (error) {
+		dispatch({
+			type: POST_FAIL,
+			payload: JSON.stringify(error),
 		});
 	}
 };

@@ -50,6 +50,9 @@ type PostState = {
   tracker?: string,
   trackerNext?: string,
   trackerPrev?: string,
+  sort?: FirebaseSort,
+  orderBy?: string,
+  search?: string
 }
 
 type PostAction = {

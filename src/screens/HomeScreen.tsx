@@ -6,6 +6,7 @@ import Form from '../components/Form';
 import Loader from '../components/Loader';
 import Modal from '../components/Modal';
 import Post from '../components/Post';
+
 export default function HomeScreen() {
 	const dispatch = useDispatch();
 	const { posts, loading, error } = useSelector(

@@ -14,6 +14,10 @@ import {
 	POST_PAGINATE_PREV_SUCCESS,
 	POST_PAGINATE_REQUEST_NEXT,
 	POST_PAGINATE_REQUEST_PREV,
+	POST_SEARCH_REQUEST,
+	POST_SEARCH_SUCCESS,
+	POST_SORT_REQUEST,
+	POST_SORT_SUCCESS,
 	POST_UPDATE_REQUEST,
 	POST_UPDATE_SUCCESS,
 } from '../constants/postConstants';
@@ -29,6 +33,9 @@ export const postReducer = (
 		nHasmore: true,
 		pHasmore: true,
 		pPosts: [],
+		orderBy: 'createdAt',
+		sort: 'desc' as FirebaseSort,
+		search: '',
 	},
 	action: PostAction
 ): PostState => {
@@ -42,6 +49,7 @@ export const postReducer = (
 				iPosts: [],
 				pPosts: [],
 				tracker: '',
+				chunks: [],
 			};
 		case POST_LIST_SUCCESS:
 			return {
@@ -65,7 +73,14 @@ export const postReducer = (
 		case POST_INIFINITE_REQUEST:
 			return state.iPosts
 				? { ...state, loading: true, posts: [], pPosts: [] }
-				: { ...state, loading: true, posts: [], iPosts: [], pPosts: [] };
+				: {
+						...state,
+						loading: true,
+						posts: [],
+						iPosts: [],
+						pPosts: [],
+						chunks: [],
+				  };
 		case POST_INIFINITE_SUCCESS:
 			const { data, tracker, hasmore } = action.payload;
 			return {
@@ -150,6 +165,39 @@ export const postReducer = (
 					...state.posts.slice(index + 1),
 				],
 			};
+		// SORTING
+		case POST_SORT_REQUEST:
+			const { sort, orderBy } = action.payload;
+			return {
+				...state,
+				loading: true,
+				iPosts: [],
+				pPosts: [],
+				tracker: '',
+				hasmore: true,
+				chunks: [],
+				sort,
+				orderBy,
+			};
+		case POST_SORT_SUCCESS:
+			return { ...state, loading: false, error: null };
+
+		// SEARCH
+		case POST_SEARCH_REQUEST:
+			const { search } = action.payload;
+			return {
+				...state,
+				loading: true,
+				iPosts: [],
+				pPosts: [],
+				tracker: '',
+				hasmore: true,
+				chunks: [],
+				search,
+			};
+		case POST_SEARCH_SUCCESS:
+			return { ...state, loading: false, error: null };
+
 		case POST_FAIL:
 			return { loading: false, error: action.payload };
 		default:

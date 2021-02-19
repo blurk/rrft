@@ -23,6 +23,10 @@ import {
 } from '../constants/postConstants';
 import { updateObject } from '../utils/object';
 
+const paramsValue = window.location.search
+	?.split('&')
+	.map((s) => s.split('=')[1]);
+
 export const postReducer = (
 	state = {
 		posts: [],
@@ -33,9 +37,10 @@ export const postReducer = (
 		nHasmore: true,
 		pHasmore: true,
 		pPosts: [],
-		orderBy: 'createdAt',
-		sort: 'desc' as FirebaseSort,
-		search: '',
+		search: paramsValue[0] || '',
+		orderBy: paramsValue[1] || 'createdAt',
+		sort: (paramsValue[2] as FirebaseSort) || ('desc' as FirebaseSort),
+		error: {},
 	},
 	action: PostAction
 ): PostState => {
@@ -199,7 +204,7 @@ export const postReducer = (
 			return { ...state, loading: false, error: null };
 
 		case POST_FAIL:
-			return { loading: false, error: action.payload };
+			return { ...state, loading: false, error: action.payload };
 		default:
 			return state;
 	}

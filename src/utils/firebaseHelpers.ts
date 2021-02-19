@@ -98,9 +98,7 @@ const getPaginateDataNext = async (limit: number, collection: string, last: stri
 	const ref = db.collection(collection);
 	let query;
 	try {
-
 		const { end, start } = await getStartEnd(collection, orderBy, sort, search);
-
 
 		if (!last) {
 			query = search ? ref.where(searchField, '==', search).orderBy(orderBy, sort).limit(limit) :
@@ -116,7 +114,6 @@ const getPaginateDataNext = async (limit: number, collection: string, last: stri
 			...doc.data(),
 			id: doc.id,
 		}))
-
 
 		return {
 			data,

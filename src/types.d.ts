@@ -31,8 +31,9 @@ interface IProps {
   post?: IPost,
   postDetails?: IPost | any,
   ref?: any,
-  forwardedRef?: any
-
+  forwardedRef?: any,
+  search?: string,
+  defaultOption?: string
 }
 
 type PostState = {

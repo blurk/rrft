@@ -86,15 +86,24 @@ export const getPostInfinite = (limit: number) => async (
 			search
 		);
 
-		dispatch({
-			type: POST_INIFINITE_SUCCESS,
-			payload: { data, tracker: next, hasmore },
-		});
+		if (data.length > 0) {
+			dispatch({
+				type: POST_INIFINITE_SUCCESS,
+				payload: { data, tracker: next, hasmore },
+			});
+		} else {
+			const err = new Error('😢');
+			dispatch({
+				type: POST_FAIL,
+				payload: err.message,
+				nHasmore: false,
+			});
+		}
 	} catch (error) {
 		console.log(error);
 		dispatch({
 			type: POST_FAIL,
-			payload: error,
+			payload: error.message,
 			hasmore: false,
 		});
 	}
@@ -105,15 +114,13 @@ export const getPaginateNext = (limit: number) => async (
 	dispatch: DispatchType,
 	getState: any
 ) => {
+	const _hasmore = getState().postReducer.hasmore;
+	if (!_hasmore) return;
+
+	const { pPosts, orderBy, sort, search } = getState().postReducer;
+	dispatch({ type: POST_PAGINATE_REQUEST_NEXT });
+
 	try {
-		const _hasmore = getState().postReducer.hasmore;
-
-		if (!_hasmore) return;
-
-		dispatch({ type: POST_PAGINATE_REQUEST_NEXT });
-
-		const { pPosts, orderBy, sort, search } = getState().postReducer;
-
 		const { data, nHasmore, pHasmore } = await getPaginateDataNext(
 			limit,
 			'posts',
@@ -123,19 +130,28 @@ export const getPaginateNext = (limit: number) => async (
 			search
 		);
 
-		dispatch({
-			type: POST_PAGINATE_NEXT_SUCCESS,
-			payload: {
-				nData: data,
-				nHasmore,
-				pHasmore,
-			},
-		});
+		if (data.length > 0) {
+			dispatch({
+				type: POST_PAGINATE_NEXT_SUCCESS,
+				payload: {
+					nData: data,
+					nHasmore,
+					pHasmore,
+				},
+			});
+		} else {
+			const err = new Error('😢');
+			dispatch({
+				type: POST_FAIL,
+				payload: err.message,
+				nHasmore: false,
+			});
+		}
 	} catch (error) {
 		console.error(error);
 		dispatch({
 			type: POST_FAIL,
-			payload: error,
+			payload: error.message,
 			nHasmore: false,
 		});
 	}
@@ -163,21 +179,29 @@ export const getPaginatePrev = (limit: number) => async (
 			sort,
 			search
 		);
-
-		dispatch({
-			type: POST_PAGINATE_PREV_SUCCESS,
-			payload: {
-				pData: data,
-				pHasmore,
-				nHasmore,
-			},
-		});
+		if (data.length > 0) {
+			dispatch({
+				type: POST_PAGINATE_PREV_SUCCESS,
+				payload: {
+					pData: data,
+					pHasmore,
+					nHasmore,
+				},
+			});
+		} else {
+			const err = new Error('😢');
+			dispatch({
+				type: POST_FAIL,
+				payload: err.message,
+				nHasmore: false,
+			});
+		}
 	} catch (error) {
 		console.error(error);
 		dispatch({
 			type: POST_FAIL,
-			payload: error,
-			pHasmore: false,
+			payload: error.message,
+			nHasmore: false,
 		});
 	}
 };
@@ -238,14 +262,17 @@ export const updatePost = (id: string, data: object) => async (
 	}
 };
 
-export const sortPost = (orderBy: string, sort: FirebaseSort) => async (
-	dispatch: DispatchType
-) => {
+export const sortPost = (
+	orderBy: string,
+	sort: FirebaseSort,
+	curPage: string
+) => async (dispatch: DispatchType) => {
 	try {
 		dispatch({ type: POST_SORT_REQUEST, payload: { orderBy, sort } });
 
-		dispatch(getPostInfinite(8));
-		dispatch(getPaginateNext(8));
+		curPage === 'paginate'
+			? dispatch(getPaginateNext(8))
+			: dispatch(getPostInfinite(8));
 
 		dispatch({ type: POST_SORT_SUCCESS });
 	} catch (error) {
@@ -256,14 +283,15 @@ export const sortPost = (orderBy: string, sort: FirebaseSort) => async (
 	}
 };
 
-export const searchPost = (search: string) => async (
+export const searchPost = (search: string, curPage?: string) => async (
 	dispatch: DispatchType
 ) => {
 	try {
 		dispatch({ type: POST_SEARCH_REQUEST, payload: { search } });
 
-		dispatch(getPostInfinite(8));
-		dispatch(getPaginateNext(8));
+		curPage === 'paginate'
+			? dispatch(getPaginateNext(8))
+			: dispatch(getPostInfinite(8));
 
 		dispatch({ type: POST_SEARCH_SUCCESS });
 	} catch (error) {

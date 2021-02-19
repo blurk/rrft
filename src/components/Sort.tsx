@@ -1,10 +1,17 @@
-import React, { ChangeEvent, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { ChangeEvent } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory, useLocation } from 'react-router-dom';
 import { sortPost } from '../actions/postActions';
-
-export default function Sort() {
-	const [timer, setTimer] = useState<any>(null);
+let timer: any = null;
+export default function Sort({ defaultOption }: IProps) {
+	const history = useHistory();
+	const { pathname } = useLocation();
 	const dispatch = useDispatch();
+
+	const { sort, orderBy, search } = useSelector(
+		(state: RootState) => state.postReducer
+	);
+	let optionValue = `${orderBy}-${defaultOption || sort}`;
 
 	const handleSelectChange = (e: ChangeEvent) => {
 		const { value } = e.target as HTMLInputElement;
@@ -17,11 +24,13 @@ export default function Sort() {
 
 	const sorter = (orderBy: string, sort: string) => {
 		clearTimeout(timer);
-		setTimer(
-			setTimeout(() => {
-				dispatch(sortPost(orderBy, sort as FirebaseSort));
-			}, 500)
-		);
+		timer = setTimeout(() => {
+			dispatch(sortPost(orderBy, sort as FirebaseSort, pathname.split('/')[1]));
+			history.push({
+				pathname: pathname,
+				search: search ? `title=${search}&orderBy=${orderBy}&sort=${sort}` : '',
+			});
+		}, 100);
 	};
 
 	return (
@@ -29,8 +38,8 @@ export default function Sort() {
 			<label htmlFor='sorter'>Sort</label>
 			<select
 				name='sorter'
-				id='sorter'
 				className='ml-1 border border-gray-500'
+				value={optionValue}
 				onChange={handleSelectChange}>
 				<option value='createdAt-desc'>Lastest(Default)</option>
 				<option value='createdAt-asc'>Oldest</option>

@@ -1,34 +1,51 @@
-import React, { ChangeEvent, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { ChangeEvent, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory, useLocation } from 'react-router-dom';
 import { searchPost } from '../actions/postActions';
 
+let timer: any = null;
+
 export default function Search() {
-	const [timer, setTimer] = useState<any>(null);
+	const history = useHistory();
+	const { pathname } = useLocation();
 
 	const dispatch = useDispatch();
+	const { search, sort, orderBy } = useSelector(
+		(state: RootState) => state.postReducer
+	);
+
+	const [value, setValue] = useState<string>('');
 
 	const handleInputChange = (e: ChangeEvent) => {
 		const { value } = e.target as HTMLInputElement;
+		setValue(value.trim());
 		searcher(value.trim());
 	};
 
+	useEffect(() => {
+		if (!search) setValue('');
+		else setValue(search);
+	}, [search]);
+
 	const searcher = (search: string) => {
 		clearTimeout(timer);
-		setTimer(
-			setTimeout(() => {
-				dispatch(searchPost(search));
-			}, 500)
-		);
+		timer = setTimeout(() => {
+			dispatch(searchPost(search, pathname.split('/')[1]));
+			history.push({
+				pathname: pathname,
+				search: search ? `title=${search}&orderBy=${orderBy}&sort=${sort}` : '',
+			});
+		}, 500);
 	};
 
 	return (
 		<div className='flex justify-center w-1/2 p-1 align-middle transition-colors border-2 border-gray-200 rounded-xl hover:border-gray-300 focus:border-blue-500 max-h-11 md:w-auto'>
 			<input
 				type='text'
-				id='filter'
 				className='w-full md:px-4 focus:outline-none'
 				placeholder='Filter by name'
 				onChange={handleInputChange}
+				value={value}
 			/>
 			<button className='hidden md:block'>
 				<svg

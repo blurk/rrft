@@ -8,6 +8,7 @@ import Modal from '../components/Modal';
 import Post from '../components/Post';
 import Search from '../components/Search';
 import Sort from '../components/Sort';
+import NotFoundSearch from './NotFoundSearch';
 
 export default function InfiniteScreen() {
 	const dispatch = useDispatch();
@@ -48,15 +49,23 @@ export default function InfiniteScreen() {
 				<Sort />
 				<Search />
 			</div>
-			<div className='flex flex-wrap w-full mt-10'>
-				{iPosts?.map((post) => {
-					if (post.id === tracker)
-						return (
-							<Post post={post} key={post.id} forwardedRef={lastElementRef} />
-						);
-					return <Post key={post.id} post={post} />;
-				})}
-			</div>
+
+			{iPosts?.length! > 0 ? (
+				<div className='flex flex-wrap w-full mt-10'>
+					{iPosts?.map((post) => {
+						if (post.id === tracker)
+							return (
+								<Post post={post} key={post.id} forwardedRef={lastElementRef} />
+							);
+						return <Post key={post.id} post={post} />;
+					})}
+				</div>
+			) : error ? (
+				<NotFoundSearch />
+			) : (
+				<Loader />
+			)}
+
 			{loading && <Loader />}
 			{/* ADD BUTTON */}
 			<AddPost />
